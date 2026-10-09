@@ -1,0 +1,239 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.waikikigo.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <!-- Permissions for Location, Data, Camera -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:6:5-67
+12-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:6:22-64
+13    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+13-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:7:5-79
+13-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:7:22-76
+14    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+14-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:8:5-79
+14-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:8:22-76
+15    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+15-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:9:5-81
+15-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:9:22-78
+16    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+16-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:10:5-85
+16-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:10:22-82
+17    <uses-permission android:name="android.permission.CAMERA" />
+17-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:11:5-65
+17-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:11:22-62
+18
+19    <uses-feature
+19-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:12:5-85
+20        android:name="android.hardware.camera"
+20-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:12:19-57
+21        android:required="false" />
+21-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:12:58-82
+22    <uses-feature
+22-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:26:5-28:35
+23        android:glEsVersion="0x00020000"
+23-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:27:9-41
+24        android:required="true" />
+24-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:28:9-32
+25
+26    <queries>
+26-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:30:5-34:15
+27
+28        <!-- Needs to be explicitly declared on Android R+ -->
+29        <package android:name="com.google.android.apps.maps" />
+29-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:33:9-64
+29-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:33:18-61
+30    </queries>
+31
+32    <permission
+32-->[androidx.core:core:1.15.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/c3d69b23ebf22fda042b5c6619b6c595/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+33        android:name="com.waikikigo.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+33-->[androidx.core:core:1.15.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/c3d69b23ebf22fda042b5c6619b6c595/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+34        android:protectionLevel="signature" />
+34-->[androidx.core:core:1.15.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/c3d69b23ebf22fda042b5c6619b6c595/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+35
+36    <uses-permission android:name="com.waikikigo.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+36-->[androidx.core:core:1.15.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/c3d69b23ebf22fda042b5c6619b6c595/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+36-->[androidx.core:core:1.15.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/c3d69b23ebf22fda042b5c6619b6c595/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+37
+38    <application
+38-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:14:5-42:19
+39        android:name="com.waikikigo.app.WaikikiGoApplication"
+39-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:15:9-45
+40        android:allowBackup="true"
+40-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:16:9-35
+41        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+41-->[androidx.core:core:1.15.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/c3d69b23ebf22fda042b5c6619b6c595/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+42        android:dataExtractionRules="@xml/data_extraction_rules"
+42-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:17:9-65
+43        android:debuggable="true"
+44        android:extractNativeLibs="false"
+45        android:fullBackupContent="@xml/backup_rules"
+45-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:18:9-54
+46        android:icon="@android:mipmap/sym_def_app_icon"
+46-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:19:9-56
+47        android:label="@string/app_name"
+47-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:20:9-41
+48        android:roundIcon="@android:mipmap/sym_def_app_icon"
+48-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:21:9-61
+49        android:supportsRtl="true"
+49-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:22:9-35
+50        android:theme="@style/Theme.WaikikiGo" >
+50-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:23:9-47
+51
+52        <!-- Google Maps API Key Placeholder -->
+53        <meta-data
+53-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:27:9-29:56
+54            android:name="com.google.android.geo.API_KEY"
+54-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:28:13-58
+55            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+55-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:29:13-53
+56
+57        <activity
+57-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:31:9-41:20
+58            android:name="com.waikikigo.app.MainActivity"
+58-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:32:13-41
+59            android:exported="true"
+59-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:33:13-36
+60            android:label="@string/app_name"
+60-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:34:13-45
+61            android:theme="@style/Theme.WaikikiGo"
+61-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:35:13-51
+62            android:windowSoftInputMode="adjustResize" >
+62-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:36:13-55
+63            <intent-filter>
+63-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:37:13-40:29
+64                <action android:name="android.intent.action.MAIN" />
+64-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:38:17-69
+64-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:38:25-66
+65
+66                <category android:name="android.intent.category.LAUNCHER" />
+66-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:39:17-77
+66-->/Users/cohisamoto/AndroidStudioProjects/Wakiki-Go/app/src/main/AndroidManifest.xml:39:27-74
+67            </intent-filter>
+68        </activity>
+69
+70        <service
+70-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:24:9-33:19
+71            android:name="androidx.camera.core.impl.MetadataHolderService"
+71-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:25:13-75
+72            android:enabled="false"
+72-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:26:13-36
+73            android:exported="false" >
+73-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:27:13-37
+74            <meta-data
+74-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:30:13-32:89
+75                android:name="androidx.camera.core.impl.MetadataHolderService.DEFAULT_CONFIG_PROVIDER"
+75-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:31:17-103
+76                android:value="androidx.camera.camera2.Camera2Config$DefaultProvider" />
+76-->[androidx.camera:camera-camera2:1.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2669cfb972568ea2af881bc2e7b30559/transformed/camera-camera2-1.4.0/AndroidManifest.xml:32:17-86
+77        </service> <!-- Needs to be explicitly declared on P+ -->
+78        <uses-library
+78-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:39:9-41:40
+79            android:name="org.apache.http.legacy"
+79-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:40:13-50
+80            android:required="false" />
+80-->[com.google.android.gms:play-services-maps:19.0.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/53f91c3081947ed42f388c1fe34ff112/transformed/play-services-maps-19.0.0/AndroidManifest.xml:41:13-37
+81
+82        <activity
+82-->[com.google.android.gms:play-services-base:18.5.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/789d1e7e98f8f0b257138aecf11b63ef/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:9-173
+83            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+83-->[com.google.android.gms:play-services-base:18.5.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/789d1e7e98f8f0b257138aecf11b63ef/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:19-85
+84            android:exported="false"
+84-->[com.google.android.gms:play-services-base:18.5.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/789d1e7e98f8f0b257138aecf11b63ef/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:146-170
+85            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+85-->[com.google.android.gms:play-services-base:18.5.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/789d1e7e98f8f0b257138aecf11b63ef/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:86-145
+86
+87        <meta-data
+87-->[com.google.android.gms:play-services-basement:18.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/eddbd8d2c89676131d97cc10a3056bf4/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:9-122
+88            android:name="com.google.android.gms.version"
+88-->[com.google.android.gms:play-services-basement:18.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/eddbd8d2c89676131d97cc10a3056bf4/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:20-65
+89            android:value="@integer/google_play_services_version" />
+89-->[com.google.android.gms:play-services-basement:18.4.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/eddbd8d2c89676131d97cc10a3056bf4/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:66-119
+90
+91        <provider
+91-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+92            android:name="androidx.startup.InitializationProvider"
+92-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+93            android:authorities="com.waikikigo.app.androidx-startup"
+93-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+94            android:exported="false" >
+94-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+95            <meta-data
+95-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+96                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+96-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+97                android:value="androidx.startup" />
+97-->[androidx.emoji2:emoji2:1.3.0] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/66c68c8d415da0dfcc1a135f0dd54cad/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+98            <meta-data
+98-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/cc9ad0806bebf0f64bbd1268ad2b3c89/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:29:13-31:52
+99                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+99-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/cc9ad0806bebf0f64bbd1268ad2b3c89/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:30:17-78
+100                android:value="androidx.startup" />
+100-->[androidx.lifecycle:lifecycle-process:2.8.7] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/cc9ad0806bebf0f64bbd1268ad2b3c89/transformed/lifecycle-process-2.8.7/AndroidManifest.xml:31:17-49
+101            <meta-data
+101-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+102                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+102-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+103                android:value="androidx.startup" />
+103-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+104        </provider>
+105
+106        <activity
+106-->[androidx.compose.ui:ui-test-manifest:1.7.5] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2820eb17ec1bddeaf5321330d9d45051/transformed/ui-test-manifest-1.7.5/AndroidManifest.xml:23:9-25:39
+107            android:name="androidx.activity.ComponentActivity"
+107-->[androidx.compose.ui:ui-test-manifest:1.7.5] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2820eb17ec1bddeaf5321330d9d45051/transformed/ui-test-manifest-1.7.5/AndroidManifest.xml:24:13-63
+108            android:exported="true" />
+108-->[androidx.compose.ui:ui-test-manifest:1.7.5] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/2820eb17ec1bddeaf5321330d9d45051/transformed/ui-test-manifest-1.7.5/AndroidManifest.xml:25:13-36
+109        <activity
+109-->[androidx.compose.ui:ui-tooling-android:1.7.5] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/ecca33039aa7c8526c9052ac2eb04abe/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+110            android:name="androidx.compose.ui.tooling.PreviewActivity"
+110-->[androidx.compose.ui:ui-tooling-android:1.7.5] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/ecca33039aa7c8526c9052ac2eb04abe/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+111            android:exported="true" />
+111-->[androidx.compose.ui:ui-tooling-android:1.7.5] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/ecca33039aa7c8526c9052ac2eb04abe/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+112
+113        <receiver
+113-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+114            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+114-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+115            android:directBootAware="false"
+115-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+116            android:enabled="true"
+116-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+117            android:exported="true"
+117-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+118            android:permission="android.permission.DUMP" >
+118-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+119            <intent-filter>
+119-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+120                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+120-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+120-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+121            </intent-filter>
+122            <intent-filter>
+122-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+123                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+123-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+123-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+124            </intent-filter>
+125            <intent-filter>
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+126                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+126-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+126-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+127            </intent-filter>
+128            <intent-filter>
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+129                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+129-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+129-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/cohisamoto/.gradle/caches/8.11.1/transforms/b08d09ad2ec460ebb642ce61ac0d52b7/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+130            </intent-filter>
+131        </receiver>
+132    </application>
+133
+134</manifest>

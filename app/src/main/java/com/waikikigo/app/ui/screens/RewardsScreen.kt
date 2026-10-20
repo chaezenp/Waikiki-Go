@@ -56,7 +56,7 @@ fun RewardsScreen(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Redeem your accumulated quest points for discounts & free meals!",
+                    text = "Redeem your quest points for purchase-based perks & discounts!",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.85f)
                 )
@@ -185,6 +185,33 @@ fun RewardsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Purchase Requirement Badge
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = SunsetCoral.copy(alpha = 0.12f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingBag,
+                                    contentDescription = null,
+                                    tint = SunsetCoral,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = reward.purchaseRequirement,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SunsetCoral
+                                )
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(12.dp))
 
                         if (reward.isRedeemed) {
@@ -272,9 +299,24 @@ fun RewardsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Present this ticket to your waiter at ${reward.restaurantName}:",
+                        text = "Present this voucher to your waiter at ${reward.restaurantName}:",
                         style = MaterialTheme.typography.bodyMedium
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Surface(
+                        color = SunsetCoral.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Condition: ${reward.purchaseRequirement}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SunsetCoral
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 

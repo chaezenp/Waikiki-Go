@@ -1,7 +1,7 @@
 package com.waikikigo.app.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +17,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,8 +52,8 @@ fun HomeScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var isMapExpanded by remember { mutableStateOf(false) }
+    var useSatelliteMap by remember { mutableStateOf(false) }
     var selectedRestaurantId by remember { mutableStateOf<String?>("r1") }
-    var showWalkingRoute by remember { mutableStateOf(true) }
 
     val userProfile by repository.userProfile.collectAsState()
     val batteryMode by repository.batteryMode.collectAsState()
@@ -199,73 +205,60 @@ fun HomeScreen(
                 .height(if (isMapExpanded) 380.dp else 230.dp)
                 .animateContentSize()
         ) {
-            // Google Map View displaying all Waikiki restaurant pins
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                uiSettings = MapUiSettings(
-                    zoomControlsEnabled = true,
-                    myLocationButtonEnabled = true
-                ),
-                properties = MapProperties(
-                    isMyLocationEnabled = false
-                )
-            ) {
-                // User Current Position Pin
-                Marker(
-                    state = rememberMarkerState(position = userLocation),
-                    title = "Your Location in Waikiki 📍",
-                    snippet = "Walking on Kalakaua Ave",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                )
+            if (useSatelliteMap) {
+                // Interactive Google Maps SDK View
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    uiSettings = MapUiSettings(
+                        zoomControlsEnabled = true,
+                        myLocationButtonEnabled = true
+                    ),
+                    properties = MapProperties(
+                        isMyLocationEnabled = false
+                    )
+                ) {
+                    // User Position
+                    Marker(
+                        state = rememberMarkerState(position = userLocation),
+                        title = "Your Location in Waikiki 📍",
+                        snippet = "Walking on Kalakaua Ave",
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    )
 
-                // Draw Walking Route Polyline if a restaurant is selected
-                selectedRestaurant?.let { rest ->
-                    if (showWalkingRoute) {
-                        Polyline(
-                            points = listOf(
-                                userLocation,
-                                LatLng((userLocation.latitude + rest.latitude) / 2, userLocation.longitude),
-                                LatLng(rest.latitude, rest.longitude)
-                            ),
-                            color = WaikikiOceanBlue,
-                            width = 12f
+                    // Restaurant Pins
+                    filteredRestaurants.forEach { restaurant ->
+                        val isSelected = restaurant.id == selectedRestaurantId
+                        val markerState = rememberMarkerState(key = restaurant.id, position = LatLng(restaurant.latitude, restaurant.longitude))
+
+                        Marker(
+                            state = markerState,
+                            title = "${restaurant.name} 🍱 (${restaurant.rating}⭐)",
+                            snippet = "${restaurant.cuisine} • ${restaurant.distanceMeters}m away",
+                            icon = if (isSelected) {
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)
+                            } else {
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                            },
+                            onClick = {
+                                selectedRestaurantId = restaurant.id
+                                false
+                            },
+                            onInfoWindowClick = {
+                                onSelectRestaurant(restaurant.id)
+                            }
                         )
                     }
                 }
-
-                // Restaurant Location Pins
-                filteredRestaurants.forEach { restaurant ->
-                    val isSelected = restaurant.id == selectedRestaurantId
-                    val markerState = rememberMarkerState(key = restaurant.id, position = LatLng(restaurant.latitude, restaurant.longitude))
-
-                    Marker(
-                        state = markerState,
-                        title = "${restaurant.name} 🍱 (${restaurant.rating}⭐)",
-                        snippet = "${restaurant.cuisine} • ${restaurant.distanceMeters}m away • Tap to open",
-                        icon = if (isSelected) {
-                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)
-                        } else {
-                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
-                        },
-                        onClick = {
-                            selectedRestaurantId = restaurant.id
-                            showWalkingRoute = true
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(
-                                        LatLng(restaurant.latitude, restaurant.longitude), 16.5f
-                                    ),
-                                    800
-                                )
-                            }
-                            false
-                        },
-                        onInfoWindowClick = {
-                            onSelectRestaurant(restaurant.id)
-                        }
-                    )
-                }
+            } else {
+                // Rich Custom Cartographic Waikiki Map Canvas View
+                WaikikiCartographicMapCanvas(
+                    restaurants = filteredRestaurants,
+                    selectedRestaurantId = selectedRestaurantId,
+                    onSelectRestaurant = { id ->
+                        selectedRestaurantId = id
+                    }
+                )
             }
 
             // Top Map Controls Overlay Bar
@@ -292,7 +285,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Interactive GPS Map",
+                            text = "Waikiki Local Grindz Map",
                             color = Color.White,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
@@ -301,32 +294,25 @@ fun HomeScreen(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Reset Camera Overview Button
+                    // Switch Map Mode (Cartographic vs Google Satellite)
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.clickable {
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(waikikiOverview, 15f),
-                                    800
-                                )
-                            }
-                        }
+                        modifier = Modifier.clickable { useSatelliteMap = !useSatelliteMap }
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Default.CenterFocusWeak,
+                                imageVector = Icons.Default.Map,
                                 contentDescription = null,
                                 tint = WaikikiOceanBlue,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Overview",
+                                text = if (useSatelliteMap) "Graphics" else "Satellite",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = WaikikiOceanBlue
@@ -403,7 +389,7 @@ fun HomeScreen(
                                     )
                                 }
                                 Text(
-                                    text = "${rest.cuisine} • ${rest.distanceMeters}m away",
+                                    text = "${rest.cuisine} • ${rest.distanceMeters}m away in Waikiki",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -498,15 +484,6 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .clickable {
                             selectedRestaurantId = restaurant.id
-                            showWalkingRoute = true
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(
-                                        LatLng(restaurant.latitude, restaurant.longitude), 16.5f
-                                    ),
-                                    800
-                                )
-                            }
                         },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
@@ -643,6 +620,174 @@ fun HomeScreen(
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Custom Cartographic Canvas displaying the Waikiki Ocean, Beachfront, Avenues & Tappable Restaurant Pins
+ */
+@Composable
+fun WaikikiCartographicMapCanvas(
+    restaurants: List<Restaurant>,
+    selectedRestaurantId: String?,
+    onSelectRestaurant: (String) -> Unit
+) {
+    val density = LocalDensity.current.density
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFE0F2F1))
+    ) {
+        val widthPx = this.constraints.maxWidth.toFloat()
+        val heightPx = this.constraints.maxHeight.toFloat()
+
+        // Relative spatial mapping for Waikiki restaurants
+        val restaurantPositions = mapOf(
+            "r1" to Offset(widthPx * 0.72f, heightPx * 0.38f), // Ono Seafood (Kapahulu Ave)
+            "r2" to Offset(widthPx * 0.28f, heightPx * 0.65f), // Duke's Waikiki (Beachfront)
+            "r3" to Offset(widthPx * 0.80f, heightPx * 0.52f), // Rainbow Drive-In (Kanaina)
+            "r4" to Offset(widthPx * 0.48f, heightPx * 0.42f), // Marugame Udon (Kuhio Ave)
+            "r5" to Offset(widthPx * 0.22f, heightPx * 0.58f), // Poke Bar (Kalakaua Ave)
+            "r6" to Offset(widthPx * 0.62f, heightPx * 0.25f)  // Helena's (Shuttle)
+        )
+
+        val userPos = Offset(widthPx * 0.32f, heightPx * 0.62f)
+        val selectedPos = restaurantPositions[selectedRestaurantId] ?: restaurantPositions["r1"]!!
+
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            // 1. Draw Pacific Ocean
+            val oceanPath = Path().apply {
+                moveTo(0f, heightPx * 0.70f)
+                cubicTo(
+                    widthPx * 0.3f, heightPx * 0.72f,
+                    widthPx * 0.6f, heightPx * 0.78f,
+                    widthPx, heightPx * 0.85f
+                )
+                lineTo(widthPx, heightPx)
+                lineTo(0f, heightPx)
+                close()
+            }
+            drawPath(path = oceanPath, color = Color(0xFF00838F))
+
+            // 2. Draw Waikiki Beach Shoreline (Golden Sand)
+            val beachPath = Path().apply {
+                moveTo(0f, heightPx * 0.66f)
+                cubicTo(
+                    widthPx * 0.3f, heightPx * 0.68f,
+                    widthPx * 0.6f, heightPx * 0.74f,
+                    widthPx, heightPx * 0.82f
+                )
+                lineTo(widthPx, heightPx * 0.86f)
+                cubicTo(
+                    widthPx * 0.6f, heightPx * 0.79f,
+                    widthPx * 0.3f, heightPx * 0.73f,
+                    0f, heightPx * 0.71f
+                )
+                close()
+            }
+            drawPath(path = beachPath, color = Color(0xFFFBC02D))
+
+            // 3. Draw Ala Wai Canal (North border)
+            val canalPath = Path().apply {
+                moveTo(0f, heightPx * 0.15f)
+                lineTo(widthPx * 0.75f, heightPx * 0.18f)
+                lineTo(widthPx * 0.88f, heightPx * 0.32f)
+            }
+            drawPath(
+                path = canalPath,
+                color = Color(0xFF0288D1),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 18f)
+            )
+
+            // 4. Draw Main Waikiki Avenues (Kalakaua & Kuhio)
+            // Kalakaua Ave
+            drawLine(
+                color = Color.White,
+                start = Offset(0f, heightPx * 0.63f),
+                end = Offset(widthPx, heightPx * 0.78f),
+                strokeWidth = 14f
+            )
+            // Kuhio Ave
+            drawLine(
+                color = Color.White.copy(alpha = 0.85f),
+                start = Offset(0f, heightPx * 0.48f),
+                end = Offset(widthPx * 0.8f, heightPx * 0.58f),
+                strokeWidth = 10f
+            )
+            // Kapahulu Ave
+            drawLine(
+                color = Color.White.copy(alpha = 0.85f),
+                start = Offset(widthPx * 0.75f, heightPx * 0.18f),
+                end = Offset(widthPx * 0.85f, heightPx * 0.80f),
+                strokeWidth = 12f
+            )
+
+            // 5. Draw Dashed Route Path from User to Selected Restaurant
+            drawPath(
+                path = Path().apply {
+                    moveTo(userPos.x, userPos.y)
+                    lineTo((userPos.x + selectedPos.x) / 2, userPos.y)
+                    lineTo(selectedPos.x, selectedPos.y)
+                },
+                color = WaikikiOceanBlue,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 8f,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(16f, 12f), 0f)
+                )
+            )
+
+            // 6. Draw User Location Pulse Circle
+            drawCircle(
+                color = WaikikiOceanBlue.copy(alpha = 0.25f),
+                radius = 36f,
+                center = userPos
+            )
+            drawCircle(
+                color = Color(0xFF0288D1),
+                radius = 16f,
+                center = userPos
+            )
+            drawCircle(
+                color = Color.White,
+                radius = 8f,
+                center = userPos
+            )
+        }
+
+        // Tappable Restaurant Pin Chips Overlay
+        restaurants.forEach { restaurant ->
+            val pos = restaurantPositions[restaurant.id] ?: Offset(widthPx * 0.5f, heightPx * 0.5f)
+            val isSelected = restaurant.id == selectedRestaurantId
+
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = (pos.x / density - 50).dp,
+                        y = (pos.y / density - 20).dp
+                    )
+                    .clickable { onSelectRestaurant(restaurant.id) }
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = if (isSelected) SunsetCoral else Color.White,
+                    shadowElevation = if (isSelected) 8.dp else 3.dp,
+                    border = BorderStroke(1.5.dp, if (isSelected) Color.White else WaikikiOceanBlue)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (isSelected) "📍 ${restaurant.name}" else restaurant.name,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp,
+                            color = if (isSelected) Color.White else Color.Black
+                        )
                     }
                 }
             }

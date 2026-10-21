@@ -127,6 +127,15 @@ fun OnboardingScreen(
                         singleLine = true
                     )
 
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Confirm Password") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Divider()
@@ -255,7 +264,7 @@ fun OnboardingScreen(
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Text(
-                            text = "Start Waikiki Grindz Hunt 🤙",
+                            text = "Start Waikiki Grindz Hunt",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
                         )

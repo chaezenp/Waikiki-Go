@@ -1,15 +1,14 @@
 package com.waikikigo.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
@@ -18,13 +17,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -36,6 +36,7 @@ import com.waikikigo.app.ui.theme.SandyGold
 import com.waikikigo.app.ui.theme.SunsetCoral
 import com.waikikigo.app.ui.theme.WaikikiGoTheme
 import com.waikikigo.app.ui.theme.WaikikiOceanBlue
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -45,7 +46,8 @@ fun HomeScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var isMapExpanded by remember { mutableStateOf(false) }
-    var selectedRestaurantId by remember { mutableStateOf<String?>(null) }
+    var selectedRestaurantId by remember { mutableStateOf<String?>("r1") }
+    var showWalkingRoute by remember { mutableStateOf(true) }
 
     val userProfile by repository.userProfile.collectAsState()
     val batteryMode by repository.batteryMode.collectAsState()
@@ -55,10 +57,19 @@ fun HomeScreen(
         repository.getFilteredRestaurants(searchQuery)
     }
 
+    val coroutineScope = rememberCoroutineScope()
+
+    // User Location on Kalakaua Ave, Waikiki
+    val userLocation = LatLng(21.2770, -157.8270)
+
     // Waikiki center location
-    val waikikiCenter = LatLng(21.2762, -157.8268)
+    val waikikiOverview = LatLng(21.2762, -157.8268)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(waikikiCenter, 15f)
+        position = CameraPosition.fromLatLngZoom(waikikiOverview, 15f)
+    }
+
+    val selectedRestaurant = remember(selectedRestaurantId, filteredRestaurants) {
+        filteredRestaurants.find { it.id == selectedRestaurantId } ?: filteredRestaurants.firstOrNull()
     }
 
     Column(
@@ -181,11 +192,11 @@ fun HomeScreen(
             }
         }
 
-        // --- Interactive Waikiki Google Map Container ---
+        // --- Interactive Functional Waikiki Map Container ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (isMapExpanded) 360.dp else 220.dp)
+                .height(if (isMapExpanded) 380.dp else 230.dp)
                 .animateContentSize()
         ) {
             // Google Map View displaying all Waikiki restaurant pins
@@ -193,8 +204,8 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
                 uiSettings = MapUiSettings(
-                    zoomControlsEnabled = false,
-                    myLocationButtonEnabled = false
+                    zoomControlsEnabled = true,
+                    myLocationButtonEnabled = true
                 ),
                 properties = MapProperties(
                     isMyLocationEnabled = false
@@ -202,20 +213,52 @@ fun HomeScreen(
             ) {
                 // User Current Position Pin
                 Marker(
-                    state = rememberMarkerState(position = LatLng(21.2770, -157.8270)),
+                    state = rememberMarkerState(position = userLocation),
                     title = "Your Location in Waikiki 📍",
-                    snippet = "Walking on Kalakaua Ave"
+                    snippet = "Walking on Kalakaua Ave",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                 )
+
+                // Draw Walking Route Polyline if a restaurant is selected
+                selectedRestaurant?.let { rest ->
+                    if (showWalkingRoute) {
+                        Polyline(
+                            points = listOf(
+                                userLocation,
+                                LatLng((userLocation.latitude + rest.latitude) / 2, userLocation.longitude),
+                                LatLng(rest.latitude, rest.longitude)
+                            ),
+                            color = WaikikiOceanBlue,
+                            width = 12f
+                        )
+                    }
+                }
 
                 // Restaurant Location Pins
                 filteredRestaurants.forEach { restaurant ->
+                    val isSelected = restaurant.id == selectedRestaurantId
                     val markerState = rememberMarkerState(key = restaurant.id, position = LatLng(restaurant.latitude, restaurant.longitude))
+
                     Marker(
                         state = markerState,
                         title = "${restaurant.name} 🍱 (${restaurant.rating}⭐)",
-                        snippet = "${restaurant.cuisine} • ${restaurant.distanceMeters}m away • Tap to view",
+                        snippet = "${restaurant.cuisine} • ${restaurant.distanceMeters}m away • Tap to open",
+                        icon = if (isSelected) {
+                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)
+                        } else {
+                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                        },
                         onClick = {
                             selectedRestaurantId = restaurant.id
+                            showWalkingRoute = true
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.newLatLngZoom(
+                                        LatLng(restaurant.latitude, restaurant.longitude), 16.5f
+                                    ),
+                                    800
+                                )
+                            }
                             false
                         },
                         onInfoWindowClick = {
@@ -225,16 +268,16 @@ fun HomeScreen(
                 }
             }
 
-            // Top Map Overlay Bar
+            // Top Map Controls Overlay Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    color = Color.Black.copy(alpha = 0.7f),
+                    color = Color.Black.copy(alpha = 0.75f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
@@ -249,7 +292,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Waikiki Beach Map View",
+                            text = "Interactive GPS Map",
                             color = Color.White,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
@@ -257,76 +300,125 @@ fun HomeScreen(
                     }
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.clickable { isMapExpanded = !isMapExpanded }
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Reset Camera Overview Button
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.clickable {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.newLatLngZoom(waikikiOverview, 15f),
+                                    800
+                                )
+                            }
+                        }
                     ) {
-                        Icon(
-                            imageVector = if (isMapExpanded) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                            contentDescription = null,
-                            tint = WaikikiOceanBlue,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = if (isMapExpanded) "Collapse Map" else "Expand Map",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = WaikikiOceanBlue
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CenterFocusWeak,
+                                contentDescription = null,
+                                tint = WaikikiOceanBlue,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Overview",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = WaikikiOceanBlue
+                            )
+                        }
+                    }
+
+                    // Expand Map Toggle
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.clickable { isMapExpanded = !isMapExpanded }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (isMapExpanded) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                                contentDescription = null,
+                                tint = WaikikiOceanBlue,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (isMapExpanded) "Collapse" else "Expand",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = WaikikiOceanBlue
+                            )
+                        }
                     }
                 }
             }
 
-            // Bottom Map Location Pin Carousel
+            // Bottom Selected Restaurant Floating Quick Card
             Box(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(bottom = 8.dp, start = 8.dp, end = 8.dp)
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(filteredRestaurants) { rest ->
-                        val isSelected = selectedRestaurantId == rest.id
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = if (isSelected) WaikikiOceanBlue else MaterialTheme.colorScheme.surface,
-                            shadowElevation = 6.dp,
-                            modifier = Modifier.clickable {
-                                selectedRestaurantId = rest.id
-                                cameraPositionState.position = CameraPosition.fromLatLngZoom(
-                                    LatLng(rest.latitude, rest.longitude), 16f
+                selectedRestaurant?.let { rest ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.Place,
+                                        contentDescription = null,
+                                        tint = SunsetCoral,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = rest.name,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Text(
+                                    text = "${rest.cuisine} • ${rest.distanceMeters}m away",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
+
+                            Button(
+                                onClick = { onSelectRestaurant(rest.id) },
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = WaikikiOceanBlue)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Place,
-                                    contentDescription = null,
-                                    tint = if (isSelected) Color.White else SunsetCoral,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = rest.name,
-                                    fontWeight = FontWeight.Bold,
+                                    text = "View Grindz ➔",
                                     fontSize = 12.sp,
-                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "${rest.distanceMeters}m",
-                                    fontSize = 10.sp,
-                                    color = if (isSelected) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
@@ -404,7 +496,18 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onSelectRestaurant(restaurant.id) },
+                        .clickable {
+                            selectedRestaurantId = restaurant.id
+                            showWalkingRoute = true
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.newLatLngZoom(
+                                        LatLng(restaurant.latitude, restaurant.longitude), 16.5f
+                                    ),
+                                    800
+                                )
+                            }
+                        },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (isSelected) WaikikiOceanBlue.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface

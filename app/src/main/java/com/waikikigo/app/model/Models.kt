@@ -70,10 +70,9 @@ data class Restaurant(
 )
 
 enum class RewardCategory(val displayName: String) {
-    PERCENT_DISCOUNT("Percent Discount 🏷️"),
-    BUY_ONE_GET_ONE("Buy 1 Get 1 Deal (BOGO) 🍔"),
-    GIFT_WITH_PURCHASE("Bonus Item With Purchase 🍹"),
-    VIP_SPECIAL("VIP Upgrade With Entrée ✨")
+    BUY_ONE_GET_ONE("Buy 1 Get 1 (BOGO) 🍔"),
+    DISCOUNT("Discount 🏷️"),
+    ADD_ON("Meal Add-On 🍟")
 }
 
 data class Reward(

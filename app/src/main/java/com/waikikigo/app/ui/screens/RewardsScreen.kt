@@ -30,6 +30,7 @@ fun RewardsScreen(
     val userProfile by repository.userProfile.collectAsState()
     val rewards by repository.rewards.collectAsState()
 
+    var pendingConfirmationReward by remember { mutableStateOf<Reward?>(null) }
     var activeVoucherReward by remember { mutableStateOf<Reward?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -248,10 +249,7 @@ fun RewardsScreen(
                             Button(
                                 onClick = {
                                     if (canAfford) {
-                                        val success = repository.redeemReward(reward.id)
-                                        if (success) {
-                                            activeVoucherReward = reward.copy(isRedeemed = true)
-                                        }
+                                        pendingConfirmationReward = reward
                                     } else {
                                         errorMessage = "You need ${reward.pointCost - userProfile.totalPoints} more points to unlock this reward!"
                                     }
@@ -272,6 +270,104 @@ fun RewardsScreen(
                 }
             }
         }
+    }
+
+    // --- Purchase Confirmation Popup Modal ---
+    pendingConfirmationReward?.let { reward ->
+        AlertDialog(
+            onDismissRequest = { pendingConfirmationReward = null },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    tint = WaikikiOceanBlue,
+                    modifier = Modifier.size(44.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Confirm Perk Redemption",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Are you sure you want to redeem points for this perk at ${reward.restaurantName}?",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = reward.title,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Cost: ${reward.pointCost} Points",
+                                color = SandyGold,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Remaining Balance: ${userProfile.totalPoints - reward.pointCost} Points",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Surface(
+                        color = SunsetCoral.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Condition: ${reward.purchaseRequirement}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SunsetCoral
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val success = repository.redeemReward(reward.id)
+                        if (success) {
+                            activeVoucherReward = reward.copy(isRedeemed = true)
+                        }
+                        pendingConfirmationReward = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = WaikikiOceanBlue)
+                ) {
+                    Text("Confirm & Redeem 🎟️")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { pendingConfirmationReward = null }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     // --- Voucher Modal Displaying QR Code & Voucher Code ---

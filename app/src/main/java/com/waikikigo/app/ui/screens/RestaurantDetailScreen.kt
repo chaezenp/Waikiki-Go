@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,11 +16,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.*
 import com.waikikigo.app.data.WaikikiDataRepository
 import com.waikikigo.app.ui.theme.PalmGreen
 import com.waikikigo.app.ui.theme.SandyGold
 import com.waikikigo.app.ui.theme.SunsetCoral
 import com.waikikigo.app.ui.theme.WaikikiOceanBlue
+import com.waikikigo.app.util.MapUtils
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -54,7 +62,7 @@ fun RestaurantDetailScreen(
                 title = { Text(restaurant.name, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -131,6 +139,103 @@ fun RestaurantDetailScreen(
                             text = "${restaurant.address} (${restaurant.distanceMeters}m)",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Interactive Location & Directions Google Map Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Place,
+                                contentDescription = null,
+                                tint = WaikikiOceanBlue,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Waikiki Location & Map",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    val restaurantLatLng = remember(restaurant.latitude, restaurant.longitude) {
+                        LatLng(restaurant.latitude, restaurant.longitude)
+                    }
+                    val cameraPositionState = rememberCameraPositionState {
+                        position = CameraPosition.fromLatLngZoom(restaurantLatLng, 16f)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                    ) {
+                        GoogleMap(
+                            modifier = Modifier.fillMaxSize(),
+                            cameraPositionState = cameraPositionState,
+                            uiSettings = MapUiSettings(
+                                zoomControlsEnabled = true,
+                                mapToolbarEnabled = false
+                            )
+                        ) {
+                            Marker(
+                                state = rememberMarkerState(position = restaurantLatLng),
+                                title = restaurant.name,
+                                snippet = restaurant.address,
+                                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    val context = LocalContext.current
+                    Button(
+                        onClick = {
+                            MapUtils.openGoogleMapsNavigation(
+                                context = context,
+                                latitude = restaurant.latitude,
+                                longitude = restaurant.longitude,
+                                label = restaurant.name
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = SunsetCoral
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Navigation,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Get Walking Directions in Google Maps 🗺️",
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }

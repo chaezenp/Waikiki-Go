@@ -1,5 +1,6 @@
 package com.waikikigo.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
@@ -29,6 +30,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -42,6 +50,7 @@ import com.waikikigo.app.ui.theme.SandyGold
 import com.waikikigo.app.ui.theme.SunsetCoral
 import com.waikikigo.app.ui.theme.WaikikiGoTheme
 import com.waikikigo.app.ui.theme.WaikikiOceanBlue
+import com.waikikigo.app.util.MapUtils
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -64,9 +73,50 @@ fun HomeScreen(
     }
 
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
-    // User Location on Kalakaua Ave, Waikiki
-    val userLocation = LatLng(21.2770, -157.8270)
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    var userLocation by remember { mutableStateOf(LatLng(21.2770, -157.8270)) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                      permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        hasLocationPermission = granted
+        if (granted) {
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
+                    if (loc != null) {
+                        userLocation = LatLng(loc.latitude, loc.longitude)
+                    }
+                }
+            } catch (_: SecurityException) {
+                // Ignore safety exception if permissions revoked
+            }
+        }
+    }
+
+    LaunchedEffect(hasLocationPermission) {
+        if (hasLocationPermission) {
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
+                    if (loc != null) {
+                        userLocation = LatLng(loc.latitude, loc.longitude)
+                    }
+                }
+            } catch (e: SecurityException) {
+                // Ignore
+            }
+        }
+    }
 
     // Waikiki center location
     val waikikiOverview = LatLng(21.2762, -157.8268)
@@ -102,7 +152,7 @@ fun HomeScreen(
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Aloha, ${userProfile.username}! 🌺",
+                                text = "Aloha, ${userProfile.username}!",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
@@ -212,16 +262,16 @@ fun HomeScreen(
                     cameraPositionState = cameraPositionState,
                     uiSettings = MapUiSettings(
                         zoomControlsEnabled = true,
-                        myLocationButtonEnabled = true
+                        myLocationButtonEnabled = hasLocationPermission
                     ),
                     properties = MapProperties(
-                        isMyLocationEnabled = false
+                        isMyLocationEnabled = hasLocationPermission
                     )
                 ) {
                     // User Position
                     Marker(
                         state = rememberMarkerState(position = userLocation),
-                        title = "Your Location in Waikiki 📍",
+                        title = "Your Location in Waikiki 🌺",
                         snippet = "Walking on Kalakaua Ave",
                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
                     )
@@ -233,7 +283,7 @@ fun HomeScreen(
 
                         Marker(
                             state = markerState,
-                            title = "${restaurant.name} 🍱 (${restaurant.rating}⭐)",
+                            title = "${restaurant.name} 🍱 (${restaurant.rating})",
                             snippet = "${restaurant.cuisine} • ${restaurant.distanceMeters}m away",
                             icon = if (isSelected) {
                                 BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)
@@ -294,6 +344,54 @@ fun HomeScreen(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Recenter Location Button
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.clickable {
+                            if (!hasLocationPermission) {
+                                permissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            } else {
+                                try {
+                                    fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
+                                        val target = if (loc != null) LatLng(loc.latitude, loc.longitude) else userLocation
+                                        coroutineScope.launch {
+                                            cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 16f))
+                                        }
+                                    }
+                                } catch (_: SecurityException) {
+                                    coroutineScope.launch {
+                                        cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(userLocation, 16f))
+                                    }
+                                }
+                            }
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MyLocation,
+                                contentDescription = "My Location",
+                                tint = PalmGreen,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Me",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PalmGreen
+                            )
+                        }
+                    }
+
                     // Switch Map Mode (Cartographic vs Google Satellite)
                     Surface(
                         color = MaterialTheme.colorScheme.surface,
@@ -347,51 +445,68 @@ fun HomeScreen(
                     }
                 }
             }
+        }
 
-            // Bottom Selected Restaurant Floating Quick Card
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                selectedRestaurant?.let { rest ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        // --- Selected Restaurant Card (Placed below map so it never blocks map tiles) ---
+        AnimatedVisibility(visible = selectedRestaurant != null) {
+            selectedRestaurant?.let { rest ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Place,
-                                        contentDescription = null,
-                                        tint = SunsetCoral,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = rest.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Place,
+                                    contentDescription = null,
+                                    tint = SunsetCoral,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = rest.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Text(
+                                text = "${rest.cuisine} • ${rest.distanceMeters}m away in Waikiki",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = {
+                                    MapUtils.openGoogleMapsNavigation(
+                                        context = context,
+                                        latitude = rest.latitude,
+                                        longitude = rest.longitude,
+                                        label = rest.name
                                     )
                                 }
-                                Text(
-                                    text = "${rest.cuisine} • ${rest.distanceMeters}m away in Waikiki",
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Navigation,
+                                    contentDescription = "Get Directions",
+                                    tint = SunsetCoral,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
 

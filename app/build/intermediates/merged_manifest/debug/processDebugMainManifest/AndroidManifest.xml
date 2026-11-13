@@ -49,15 +49,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WaikikiGo" >
 
-        <!-- Google Maps API Key Placeholder -->
+        <!-- Google Maps API Key Configured via local.properties (MAPS_API_KEY) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+            android:value="AIzaSyDPiX48Pz3N-_z6wUIfqIDGeSJk3Tf72-Y" />
 
         <activity
             android:name="com.waikikigo.app.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.WaikikiGo"
             android:windowSoftInputMode="adjustResize" >
             <intent-filter>
